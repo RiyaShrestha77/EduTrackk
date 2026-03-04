@@ -1,24 +1,64 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import logo from "../assets/logo.png";
+
 const Footer = () => {
   return (
-    <footer className="bg-gray-100 border-t mt-10">
-      <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between text-gray-600 text-sm">
-        
-        {/* Left */}
-        <p>
-          © {new Date().getFullYear()} EduTrack. All rights reserved.
-        </p>
+    <footer className="bg-white border-t border-slate-200 pt-20 pb-14">
+      <div className="container mx-auto px-10 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
+          <div className="space-y-6">
+            <img src={logo} alt="Logo" className="h-10 w-auto" />
+            <p className="text-slate-500 text-[15px] leading-relaxed font-medium">
+              Premium learning experiences designed for the modern era. Built for students, by educators.
+            </p>
+          </div>
 
-        {/* Right */}
-        <div className="flex space-x-4 mt-2 md:mt-0">
-          <a href="#" className="hover:text-black">
-            Privacy Policy
-          </a>
-          <a href="#" className="hover:text-black">
-            Terms of Service
-          </a>
-          <a href="#" className="hover:text-black">
-            Contact
-          </a>
+          <div className="grid grid-cols-2 gap-12">
+            <div>
+              <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest mb-6">Platform</h4>
+              <ul className="space-y-5 text-[15px] font-semibold text-slate-600">
+                <li>
+                  <Link to="/courses" className="hover:text-indigo-600 transition-colors">
+                    All Courses
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className="hover:text-indigo-600 transition-colors">
+                    Our Mission
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest mb-6">Legal</h4>
+              <ul className="space-y-5 text-[15px] font-semibold text-slate-600">
+                <li>
+                  <Link to="/" className="hover:text-indigo-600 transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="hover:text-indigo-600 transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="md:text-right">
+            <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest mb-6">Contact</h4>
+            <p className="text-[16px] font-semibold text-slate-800">support@edtplatform.com</p>
+            <p className="text-[14px] text-slate-500 mt-3 font-medium">Available Mon - Fri, 9am - 5pm</p>
+          </div>
+        </div>
+
+        <div className="pt-10 border-t border-slate-100 text-center">
+          <span className="text-[13px] text-slate-400 font-semibold tracking-wide">
+            Copyright {new Date().getFullYear()} EDT Platform - All Rights Reserved
+          </span>
         </div>
       </div>
     </footer>

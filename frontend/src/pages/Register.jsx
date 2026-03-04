@@ -1,130 +1,227 @@
-
-import React, { useState } from "react";
-import edu from "../assets/edu.png"; 
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { createUserApi } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    address: "",
+    phoneNumber: "",
+    role: "student",
   });
 
-  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const validate = () => {
+    if (!formData.username.trim()) {
+      toast.error("Username is required");
+      return false;
+    }
 
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      setError("All fields are required");
-      return;
+    if (!formData.email.trim()) {
+      toast.error("Email is required");
+      return false;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      toast.error("Invalid email address");
+      return false;
+    }
+
+    if (!formData.password) {
+      toast.error("Password is required");
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
+      toast.error("Passwords do not match");
+      return false;
     }
 
-    setError("");
-    console.log("Registered User:", formData);
-    alert("Registration successful! (Mock)");
+    if (!agree) {
+      toast.error("Please agree to terms & conditions");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setLoading(true);
+
+    try {
+      const payload = {
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        address: formData.address.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        role: formData.role,
+      };
+
+      const response = await createUserApi(payload);
+
+      if (response.status === 201 || response.data?.user) {
+        toast.success("Registered successfully!");
+        navigate("/login");
+      } else {
+        toast.error(response.data?.message || "Registration failed");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-md">
-      
+    <div className="min-h-screen flex items-center justify-center bg-gray-300 p-5">
+      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg">
         <div className="flex justify-center mb-4">
-          <img src={edu} alt="EduTrack Logo" className="h-20 w-60 object-contain" />
+          <img src={logo} alt="Logo" className="h-16 w-auto" />
         </div>
-
-        <p className="text-center text-gray-500 mb-6">
-          Student Management System Registration
-        </p>
-
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 mb-4 rounded text-center">
-            {error}
-          </div>
-        )}
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">Create Account</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
-          <div>
-            <label className="block text-gray-700 mb-1">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
-            />
-          </div>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
+          />
 
-       
-          <div>
-            <label className="block text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
-            />
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
+          />
 
-
-        
-          <div>
-            <label className="block text-gray-700 mb-1">Password</label>
+          <div className="relative">
             <input
-              type="password"
+              type={showPass ? "text" : "password"}
               name="password"
-              placeholder="Create a password"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
+              className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
             />
+            <button
+              type="button"
+              onClick={() => setShowPass((prev) => !prev)}
+              className="absolute right-3 top-3 text-sm text-indigo-600"
+            >
+              {showPass ? "Hide" : "Show"}
+            </button>
           </div>
 
-         
-          <div>
-            <label className="block text-gray-700 mb-1">Confirm Password</label>
+          <div className="relative">
             <input
-              type="password"
+              type={showConfirm ? "text" : "password"}
               name="confirmPassword"
-              placeholder="Confirm your password"
+              placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
+              className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirm((prev) => !prev)}
+              className="absolute right-3 top-3 text-sm text-indigo-600"
+            >
+              {showConfirm ? "Hide" : "Show"}
+            </button>
           </div>
 
-         
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={formData.address}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
+          />
+
+          <input
+            type="text"
+            name="phoneNumber"
+            placeholder="Phone Number"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400"
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 bg-white"
+            >
+              <option value="student">Student</option>
+              <option value="instructor">Teacher</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              className="h-4 w-4 text-indigo-600"
+            />
+            <label className="text-gray-600 text-sm">I agree to terms & conditions</label>
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition duration-200"
+            disabled={loading}
+            className="w-full bg-black text-white py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition disabled:opacity-60"
           >
-            Register
+            {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-gray-600">
+        <p className="text-sm text-gray-800 mt-6 text-center">
           Already have an account?{" "}
-          <a href="/login" className="text-black hover:underline font-medium">
-            Login
-          </a>
+          <span
+            onClick={() => navigate("/login")}
+            className="text-indigo-600 hover:underline cursor-pointer"
+          >
+            Sign in
+          </span>
         </p>
       </div>
     </div>
@@ -132,4 +229,3 @@ const Register = () => {
 };
 
 export default Register;
-
